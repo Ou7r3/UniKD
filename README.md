@@ -18,7 +18,7 @@
 <p align="center">
   <img src="./figures/encoder_vs_backbone.png" alt="Image 1" width="49%">
   <img src="./figures/DEIM-FGD-conflict.png" alt="Image 2" width="49%">
-  <img src="./figures/Atto-Pico_vs_Atto-Dinov3-S" alt="Image 2" width="49%">
+  <img src="./figures/Atto-Pico_vs_Atto-Dinov3-S.png" alt="Image 2" width="49%">
   <img src="./figures/Atto-S_vs_Atto-Pico.png" alt="Image 2" width="49%">
 
 </p>
@@ -396,6 +396,6 @@ If you use `UniKD` or its methods in your work, please cite the following BibTeX
 </details>
 
 ## 7. Acknowledgement
-Our work is built upon [DEIM](https://github.com/Intellindust-AI-Lab/DEIM), [DEIMv2](https://github.com/Intellindust-AI-Lab/DEIMv2), [D-FINE](https://github.com/Peterande/D-FINE), [RT-DETR](https://github.com/lyuwenyu/RT-DETR) and [DINOv3](https://github.com/facebookresearch/dinov3). Thanks for their great work!
+Our work is built upon [DEIM](https://github.com/Intellindust-AI-Lab/DEIM), [DEIMv2](https://github.com/Intellindust-AI-Lab/DEIMv2), [FGD](https://github.com/yzd-v/FGD),[D-FINE](https://github.com/Peterande/D-FINE), [RT-DETR](https://github.com/lyuwenyu/RT-DETR) and [DINOv3](https://github.com/facebookresearch/dinov3). Thanks for their great work!
 
 ✨ Feel free to contribute and reach out if you have any questions! ✨
