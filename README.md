@@ -1,5 +1,5 @@
 <h2 align="center">
-  Real-Time Object Detection Meets DINOv3
+  UniKD: Unified Cross-Architecture Knowledge Distillation with Warm-Start Scheduling for Real-Time DETR Models
 </h2>
 
 <p align="center">
