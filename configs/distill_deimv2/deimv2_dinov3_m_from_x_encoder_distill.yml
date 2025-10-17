@@ -1,0 +1,125 @@
+__include__: [../deimv2/deimv2_dinov3_m_coco.yml]
+
+output_dir: ./outputs/distill_deimv2/dinov3_m_from_x_encoder
+
+model: DEIMFGDDistiller
+
+DEIMFGDDistiller:
+  student_ckpt: ./outputs/deimv2_dinov3_m_coco/best_stg1.pth
+  student:
+    type: DEIM
+    backbone:
+      type: DINOv3STAs
+      name: vit_tinyplus
+      embed_dim: 256
+      weights_path: ./ckpts/vittplus_distill.pt
+      interaction_indexes: [5, 8, 11]
+      num_heads: 4
+      conv_inplane: 16
+    encoder:
+      type: HybridEncoder
+      in_channels: [256, 256, 256]
+      depth_mult: 1.0
+      expansion: 0.67
+      hidden_dim: 256
+      dim_feedforward: 512
+      version: dfine
+    decoder:
+      type: DEIMTransformer
+      feat_channels: [256, 256, 256]
+      hidden_dim: 256
+      dim_feedforward: 512
+      num_layers: 4
+      eval_idx: -1
+      num_points: [6, 6, 6]
+  teacher:
+    type: DEIM
+    backbone:
+      type: DINOv3STAs
+      name: dinov3_vits16plus
+      embed_dim: 256
+      weights_path: ./ckpts/dinov3_vits16plus_pretrain_lvd1689m-4057cbaa.pth
+      interaction_indexes: [5, 8, 11]
+      finetune: true
+      conv_inplane: 64
+      hidden_dim: 256
+    encoder:
+      type: HybridEncoder
+      in_channels: [256, 256, 256]
+      hidden_dim: 256
+      dim_feedforward: 1024
+      expansion: 1.25
+      depth_mult: 1.37
+    decoder:
+      type: DEIMTransformer
+      feat_channels: [256, 256, 256]
+      hidden_dim: 256
+      dim_feedforward: 2048
+      num_layers: 6
+      eval_idx: -1
+      num_points: [6, 6, 6]
+  feature_pairs:
+    - name: p3
+      student_index: 0
+      teacher_index: 0
+      meta:
+        source: encoder
+        start_epoch: 90
+    - name: p4
+      student_index: 1
+      teacher_index: 1
+      meta:
+        source: encoder
+        start_epoch: 90
+    - name: p5
+      student_index: 2
+      teacher_index: 2
+      meta:
+        source: encoder
+        start_epoch: 90
+  teacher_ckpt: ./outputs/deimv2_dinov3_x_coco/best_stg2.pth
+
+DEIMCriterion:
+  distill_cfg:
+    - name: p5
+      weight: 0.28
+      start_epoch: 90
+      ramp_epochs: 6
+      start_weight: 0.0
+      loss:
+        type: FGDFeatureLoss
+        student_channels: 256
+        teacher_channels: 256
+        temp: 0.9
+        alpha_fgd: 0.00034
+        beta_fgd: 0.00005
+        gamma_fgd: 0.00018
+        lambda_fgd: 0.000001
+    - name: p4
+      weight: 0.22
+      start_epoch: 90
+      ramp_epochs: 6
+      start_weight: 0.0
+      loss:
+        type: FGDFeatureLoss
+        student_channels: 256
+        teacher_channels: 256
+        temp: 0.9
+        alpha_fgd: 0.00034
+        beta_fgd: 0.00005
+        gamma_fgd: 0.00018
+        lambda_fgd: 0.000001
+    - name: p3
+      weight: 0.16
+      start_epoch: 90
+      ramp_epochs: 6
+      start_weight: 0.0
+      loss:
+        type: FGDFeatureLoss
+        student_channels: 256
+        teacher_channels: 256
+        temp: 0.9
+        alpha_fgd: 0.00034
+        beta_fgd: 0.00005
+        gamma_fgd: 0.00018
+        lambda_fgd: 0.000001

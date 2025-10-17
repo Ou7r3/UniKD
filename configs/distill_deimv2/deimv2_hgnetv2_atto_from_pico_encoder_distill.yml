@@ -1,0 +1,112 @@
+__include__: [
+  '../deimv2/deimv2_hgnetv2_atto_coco.yml'
+]
+
+output_dir: ./outputs/distill_deimv2/hgnetv2_atto_from_pico_encoder
+
+model: DEIMFGDDistiller
+
+last_epoch: 500
+epoches: 524
+
+DEIMFGDDistiller:
+  student_ckpt: ./best/deimv2_hgnetv2_atto_coco_with_ema.pth
+  student:
+    type: DEIM
+    backbone:
+      type: HGNetv2
+      name: 'Atto'
+      return_idx: [2]
+      freeze_at: -1
+      freeze_norm: false
+      use_lab: true
+    encoder:
+      type: LiteEncoder
+      in_channels: [256]
+      feat_strides: [16]
+      hidden_dim: 64
+      expansion: 0.34
+      depth_mult: 0.5
+      act: silu
+    decoder:
+      type: DEIMTransformer
+      feat_channels: [64, 64]
+      feat_strides: [16, 32]
+      hidden_dim: 64
+      num_levels: 2
+      num_points: [4, 2]
+      dim_feedforward: 160
+      num_layers: 3
+      eval_idx: -1
+      num_queries: 100
+      share_bbox_head: true
+      use_gateway: false
+  teacher:
+    type: DEIM
+    backbone:
+      type: HGNetv2
+      name: 'Pico'
+      return_idx: [2]
+      freeze_at: -1
+      freeze_norm: true
+      use_lab: true
+    encoder:
+      type: LiteEncoder
+      in_channels: [512]
+      feat_strides: [16]
+      hidden_dim: 112
+      expansion: 0.34
+      depth_mult: 0.5
+      act: silu
+    decoder:
+      type: DEIMTransformer
+      feat_channels: [112, 112]
+      feat_strides: [16, 32]
+      hidden_dim: 112
+      num_levels: 2
+      num_points: [4, 2]
+      dim_feedforward: 320
+      num_layers: 3
+      eval_idx: -1
+      num_queries: 200
+      share_bbox_head: true
+      use_gateway: false
+  feature_pairs:
+    - name: c4
+      student_index: 0
+      teacher_index: 0
+      meta:
+        source: encoder
+        start_epoch: 468
+  teacher_ckpt: ./best/deimv2_hgnetv2_pico_coco.pth
+
+DEIMCriterion:
+  distill_cfg:
+    - name: c4
+      weight: 1.25
+      start_epoch: 500
+      ramp_epochs: 0
+      start_weight: 1.25
+      loss:
+        type: FGDFeatureLoss
+        student_channels: 64
+        teacher_channels: 112
+        temp: 0.9
+        alpha_fgd: 0.00028
+        beta_fgd: 0.00005
+        gamma_fgd: 0.00016
+        lambda_fgd: 0.000001
+optimizer:
+  lr: 0.0005
+  betas: [0.9, 0.999]
+  weight_decay: 0.0001
+
+lrsheduler: flatcosine
+warmup_iter: 4000
+flat_epoch: 502
+no_aug_epoch: 16
+lr_gamma: 0.2
+
+train_dataloader:
+  collate_fn:
+    stop_epoch: 500
