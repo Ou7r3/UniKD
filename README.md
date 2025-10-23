@@ -53,14 +53,14 @@
 ## 1.Scheduling Policy
 | Student | Total epoch | Enhancement Phase(Mosaic/Copy-Blend/MixUp) | FGD-Ramp-Start 
 | :---: | :---: | :---: | :---: 
-**DEIM RT-DETR** | :---: |
+**DEIM RT-DETR** |
 **PResNet-18** | 120 | 4 ──▶ 64 ──▶ 117 (stop) | c5 120, c4 124, c3 128
 **PResNet-34** | 120 | 4 ──▶ 64 ──▶ 117 (stop) | c5 120, c4 124, c3 128
-**DEIM DFINE/DEIMv2-HGNetv2** | :---: |
+**DEIM DFINE/DEIMv2-HGNetv2** |
 **HGNetv2-B0** | 160 | 4 ──▶ 78 ──▶ 148 (stop) | c5 160, c4 164, c3 168
 **HGNetv2-B2** | 102 | 4 ──▶ 49 ──▶ 90 (stop) | c5 102,  c4 106,  c3 110
 **HGNetv2-B5** |58	| 4 ──▶ 29 ──▶ 50 (stop) | c5 58,  c4 62,  c3 66
-**DEIMv2 DINOv3** | :---: |
+**DEIMv2 DINOv3** |
 **DINOv3-S** | 132	| 4 ──▶ 64 ──▶ 120 (stop) | c5 132, c4 136, c3 140
 **DINOv3-M** | 102	| 4 ──▶ 49 ──▶ 90 (stop) | c5 102,  c4 106,  c3 110
 **DINOv3-L** | 68 | 4 ──▶ 34 ──▶ 60 (stop) | c5 68,  c4 72,  c3 76
