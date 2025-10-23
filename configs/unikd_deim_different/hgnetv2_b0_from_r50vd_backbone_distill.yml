@@ -1,27 +1,28 @@
 __include__: [
-  '../deimv2/deimv2_hgnetv2_n_coco.yml'
+  '../deim_dfine/deim_hgnetv2_n_coco.yml'
 ]
 
-output_dir: ./outputs/distill/deimv2_hgnetv2_b0_from_r50vd_backbone
+output_dir: ./deim_outputs/distill_deim_different/hgnetv2_b0_from_r50vd_backbone
 
 model: DEIMFGDDistiller
 
 DEIMFGDDistiller:
+  student_ckpt: ./deim_outputs/deim_hgnetv2_n_coco/best_stg1.pth
   student:
     type: DEIM
     backbone:
       type: HGNetv2
       name: 'B0'
-      return_idx: [1, 2, 3]
+      return_idx: [2, 3]
       freeze_at: -1
       freeze_norm: false
       use_lab: true
     encoder:
       type: HybridEncoder
-      in_channels: [256, 512, 1024]
-      feat_strides: [8, 16, 32]
+      in_channels: [512, 1024]
+      feat_strides: [16, 32]
       hidden_dim: 128
-      use_encoder_idx: [2]
+      use_encoder_idx: [1]
       num_encoder_layers: 1
       nhead: 8
       dim_feedforward: 512
@@ -30,13 +31,13 @@ DEIMFGDDistiller:
       expansion: 0.34
       depth_mult: 0.5
       act: silu
+      version: dfine
     decoder:
       type: DFINETransformer
-      feat_channels: [128, 128, 128]
-      feat_strides: [8, 16, 32]
+      feat_channels: [128, 128]
+      feat_strides: [16, 32]
       hidden_dim: 128
-      dim_feedforward: 512
-      num_levels: 3
+      num_levels: 2
       num_layers: 3
       eval_idx: -1
       num_queries: 300
@@ -46,9 +47,8 @@ DEIMFGDDistiller:
       reg_max: 32
       reg_scale: 4
       layer_scale: 1
-      num_points: [6, 6, 6]
-      cross_attn_method: default
-      query_select_method: default
+      num_points: [6, 6]
+
   teacher:
     type: DEIM
     backbone:
@@ -90,82 +90,47 @@ DEIMFGDDistiller:
       num_points: [4, 4, 4]
       query_pos_method: as_reg
   feature_pairs:
-    - name: c3
-      student_index: 0
-      teacher_index: 0
-      meta:
-        source: backbone
-        start_epoch: 108
     - name: c4
-      student_index: 1
+      student_index: 0
       teacher_index: 1
       meta:
         source: backbone
-        start_epoch: 96
+        start_epoch: 150
     - name: c5
-      student_index: 2
+      student_index: 1
       teacher_index: 2
       meta:
         source: backbone
-        start_epoch: 80
-  teacher_ckpt: ../DEIM/teacher_outputs/deim_rtdetrv2_r50vd_60e_coco/best_stg1.pth
-  student_ckpt: ../DEIM/deim_outputs/deim_hgnetv2_n_coco/best_stg1.pth
+        start_epoch: 148
+  teacher_ckpt: ./teacher_outputs/deim_rtdetrv2_r50vd_60e_coco/best_stg1.pth
 
 DEIMCriterion:
   distill_cfg:
     - name: c5
-      weight: 0.16
-      start_epoch: 80
-      ramp_epochs: 12
+      weight: 0.32
+      start_epoch: 148
+      ramp_epochs: 6
       start_weight: 0.0
       loss:
         type: FGDFeatureLoss
         student_channels: 128
         teacher_channels: 256
         temp: 0.9
-        alpha_fgd: 0.00040
-        beta_fgd: 0.00005
-        gamma_fgd: 0.00022
+        alpha_fgd: 0.00042
+        beta_fgd: 0.00007
+        gamma_fgd: 0.00024
         lambda_fgd: 0.000001
     - name: c4
-      weight: 0.10
-      start_epoch: 96
-      ramp_epochs: 12
+      weight: 0.22
+      start_epoch: 150
+      ramp_epochs: 6
       start_weight: 0.0
       loss:
         type: FGDFeatureLoss
         student_channels: 128
         teacher_channels: 256
         temp: 0.9
-        alpha_fgd: 0.00040
-        beta_fgd: 0.00005
-        gamma_fgd: 0.00022
+        alpha_fgd: 0.00042
+        beta_fgd: 0.00007
+        gamma_fgd: 0.00024
         lambda_fgd: 0.000001
-    - name: c3
-      weight: 0.05
-      start_epoch: 108
-      ramp_epochs: 12
-      start_weight: 0.0
-      loss:
-        type: FGDFeatureLoss
-        student_channels: 128
-        teacher_channels: 256
-        temp: 0.9
-        alpha_fgd: 0.00040
-        beta_fgd: 0.00005
-        gamma_fgd: 0.00022
-        lambda_fgd: 0.000001
-
-flat_epoch: 7800
-no_aug_epoch: 12
-
-train_dataloader:
-  total_batch_size: 32
-  num_workers: 8
-  collate_fn:
-    mixup_epochs: [4, 78]
-    stop_epoch: 148
-
-val_dataloader:
-  total_batch_size: 64
-  num_workers: 8

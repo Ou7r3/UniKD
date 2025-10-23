@@ -1,37 +1,47 @@
 <h2 align="center">
-  Real-Time Object Detection Meets DINOv3
+  UniKD: Unified Cross-Architecture Knowledge Distillation with Warm-Start Scheduling for Real-Time DETR Models
 </h2>
 
 <p align="center">
-    DEIMv2 is an evolution of the DEIM framework while leveraging the rich features from DINOv3. Our method is designed with various model sizes, from an ultra-light version up to S, M, L, and X, to be adaptable for a wide range of scenarios. Across these variants, DEIMv2 achieves state-of-the-art performance, with the S-sized model notably surpassing 50 AP on the challenging COCO benchmark.
+    Based on DEIM/DEIMv2 accelerated convergence, we address rapid convergence in Transformers by implementing a gradual distillation approach that integrates foreground and global distillation forms with student weight warm-starting. This method also supports cross-framework knowledge distillation between CNNs and Transformers.
 </p>
 
 ---
 
-  
+<div align="center">
+  Zhang Hongye<sup>1</sup>,
+</div>
 
 <p align="center">
-<strong>If you like our work, please give us a ⭐!</strong>
+<i>
+1. North China Institute of Aerospace Engineering &nbsp;
+</i>
+</p>
+  
+---
+<p align="center">
+<strong>If you like our work, please give us a ⭐!This is important to me.</strong>
 </p>
 
+<p align="center">
+  👉📧 Corresponding author:** <a href="mailto:tunamkieu82@gmail.com">tunamkieu82@gmail.com</a>📃
+</p>
 
 <p align="center">
   <img src="./figures/encoder_vs_backbone.png" alt="Image 1" width="49%">
   <img src="./figures/DEIM-FGD-conflict.png" alt="Image 2" width="49%">
-  <img src="./figures/Atto-Pico_vs_Atto-Dinov3-S" alt="Image 2" width="49%">
-  <img src="./figures/Atto-S_vs_Atto-Pico.png" alt="Image 2" width="49%">
+  <img src="./figures/Atto-Pico_vs_Atto-Dinov3-S.png" alt="Image 3" width="49%">
+  <img src="./figures/Atto-S_vs_Atto-Pico.png" alt="Image 4" width="49%">
 
 </p>
 
 </details>
 
- 
-  
 ## 🚀 Updates
-- [x] **\[2025.9.26\]** Release DEIMv2 series.
+- [x] **\[2025.10.23\]** Release UniKD series.
 
 ## Table of Content
-* [1. Model Zoo](#1-model-zoo)
+* [1. Scheduling Policy](#1-Scheduling-Policy)
 * [2. Quick Start](#2-quick-start)
 * [3. Usage](#3-usage)
 * [4. Tools](#4-tools)
@@ -40,10 +50,21 @@
 * [7. Acknowledgement](#7-acknowledgement)
   
   
-## 1. Model Zoo
-暂定
-
-
+## 1.Scheduling Policy
+| Student | Total epoch | Enhancement Phase(Mosaic/Copy-Blend/MixUp) | FGD-Ramp-Start 
+| :---: | :---: | :---: | :---: 
+**DEIM RT-DETR** | :---: |
+**PResNet-18** | 120 | 4 ──▶ 64 ──▶ 117 (stop) | c5 120, c4 124, c3 128
+**PResNet-34** | 120 | 4 ──▶ 64 ──▶ 117 (stop) | c5 120, c4 124, c3 128
+**DEIM DFINE/DEIMv2-HGNetv2** | :---: |
+**HGNetv2-B0** | 160 | 4 ──▶ 78 ──▶ 148 (stop) | c5 160, c4 164, c3 168
+**HGNetv2-B2** | 102 | 4 ──▶ 49 ──▶ 90 (stop) | c5 102,  c4 106,  c3 110
+**HGNetv2-B5** |58	| 4 ──▶ 29 ──▶ 50 (stop) | c5 58,  c4 62,  c3 66
+**DEIMv2 DINOv3** | :---: |
+**DINOv3-S** | 132	| 4 ──▶ 64 ──▶ 120 (stop) | c5 132, c4 136, c3 140
+**DINOv3-M** | 102	| 4 ──▶ 49 ──▶ 90 (stop) | c5 102,  c4 106,  c3 110
+**DINOv3-L** | 68 | 4 ──▶ 34 ──▶ 60 (stop) | c5 68,  c4 72,  c3 76
+**DINOv3-S** | 50 | 4 ──▶ 29 ──▶ 50 (stop) | c5 50,  c4 54,  c3 58
 
 
 ## 2. Quick start
@@ -51,8 +72,8 @@
 ### Setup
 
 ```shell
-conda create -n deimv2 python=3.11 -y
-conda activate deimv2
+conda create -n unikd python=3.11 -y
+conda activate unikd
 pip install -r requirements.txt
 ```
 
@@ -116,7 +137,8 @@ To train on your custom dataset, you need to organize it in the COCO format. Fol
 
 3. **Convert Annotations to COCO Format:**
 
-    If your annotations are not already in COCO format, you'll need to convert them. You can use the following Python script as a reference or utilize existing tools:
+    If your annotations are not already in COCO format, you'll need to convert them. 
+    You can use the following Python script as a reference or utilize existing tools:
 
     ```python
     import json
@@ -154,7 +176,7 @@ To train on your custom dataset, you need to organize it in the COCO format. Fol
           type: Compose
           ops: ~
       shuffle: True
-      num_workers: 4
+      num_workers: 8
       drop_last: True
       collate_fn:
         type: BatchImageCollateFunction
@@ -170,7 +192,7 @@ To train on your custom dataset, you need to organize it in the COCO format. Fol
           type: Compose
           ops: ~
       shuffle: False
-      num_workers: 4
+      num_workers: 8
       drop_last: False
       collate_fn:
         type: BatchImageCollateFunction
@@ -209,6 +231,46 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=1234 --nproc_per_node=4   tr
 
 <details>
 <summary> Customizing Batch Size </summary>
+
+For example, If you want to perform cross-framework training and adjust distillation parameters while using backbone or encoder, here are the instructions:
+
+1. **Modify your [deimv2_hgnetv2_atto_from_dinov3_s_encoder_distill.yml](./configs/unikd_deimv2_different/deimv2_hgnetv2_atto_from_dinov3_s_encoder_distill.yml)**. Here are the key parameters for distillation that need to be adjusted based on the model:
+
+    ```yaml
+    DEIMCriterion:
+    distill_cfg:
+        - name: c4
+        weight: 1.25
+        start_epoch: 500
+        ramp_epochs: 2
+        start_weight: 0.35
+        loss:
+        type: FGDFeatureLoss
+            student_channels: 64
+            teacher_channels: 192
+            temp: 0.9
+            alpha_fgd: 0.00028
+            beta_fgd: 0.00005
+            gamma_fgd: 0.00016
+            lambda_fgd: 0.000001
+
+    ```
+2.**Modify your [deimv2_hgnetv2_atto_from_dinov3_s_encoder_distill.yml](./configs/unikd_deimv2_different/deimv2_hgnetv2_atto_from_dinov3_s_encoder_distill.yml)**If you wish to adjust the backbone or encoder using other modules, follow the steps below:
+
+    ```yaml
+    feature_pairs:
+        - name: c4
+        student_index: 0
+        teacher_index: 1
+        meta:
+            source: encoder
+            start_epoch: 502
+    eacher_ckpt: ./best/deimv2_dinov3_s_coco.pth
+    ```
+</details>  
+
+<details>
+<summary> Customizing Input Size </summary>
 
 For example, if you want to double the total batch size when training D-FINE-L on COCO2017, here are the steps you should follow:
 
@@ -289,7 +351,7 @@ pip install onnx onnxsim
 
 2. Export onnx
 ```shell
-python tools/deployment/export_onnx.py --check -c configs/deimv2/deimv2_dinov3_${model}_coco.yml -r model.pth
+python tools/deployment/export_onnx.py --check -c configs/unikd_deimv2/deimv2_${model}_encoder_distill.yml -r model.pth
 ```
 
 3. Export [tensorrt](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)
@@ -316,7 +378,7 @@ Inference on images and videos is now supported.
 ```shell
 python tools/inference/onnx_inf.py --onnx model.onnx --input image.jpg  # video.mp4
 python tools/inference/trt_inf.py --trt model.engine --input image.jpg
-python tools/inference/torch_inf.py -c configs/deimv2/deimv2_dinov3_${model}_coco.yml -r model.pth --input image.jpg --device cuda:0
+python tools/inference/torch_inf.py -c configs/unikd_deimv2/deimv2_${model}_encoder_distill.yml -r model.pth --input image.jpg --device cuda:0
 ```
 </details>
 
@@ -331,7 +393,7 @@ pip install -r tools/benchmark/requirements.txt
 <!-- <summary>6. Benchmark </summary> -->
 2. Model FLOPs, MACs, and Params
 ```shell
-python tools/benchmark/get_info.py -c configs/deimv2/deimv2_dinov3_${model}_coco.yml
+python tools/benchmark/get_info.py -c configs/unikd_deimv2/deimv2_${model}_encoder_distill.yml
 ```
 
 2. TensorRT Latency
@@ -349,7 +411,7 @@ pip install fiftyone
 ```
 4. Voxel51 Fiftyone Visualization ([fiftyone](https://github.com/voxel51/fiftyone))
 ```shell
-python tools/visualization/fiftyone_vis.py -c configs/deimv2/deimv2_dinov3_${model}_coco.yml -r model.pth
+python tools/visualization/fiftyone_vis.py -c configs/unikd_deimv2/deimv2_${model}_encoder_distill.yml -r model.pth
 ```
 </details>
 
@@ -361,18 +423,14 @@ python tools/visualization/fiftyone_vis.py -c configs/deimv2/deimv2_dinov3_${mod
 bash reference/safe_training.sh
 ```
 
-2. Converting Model Weights
-```shell
-python reference/convert_weight.py model.pth
-```
 </details>
 
 
 ## 5. DEIM-FGD Extensions
 We open-sourced knowledge-distillation recipes that marry FGD[Yang, 2021] with both DEIM and DEIMv2 while preserving each framework's native schedulers.
 
-- **Config layout.** `configs/distill_deim_dfine/` hosts DFINE teachers supervising compact HGNetv2 students; `configs/distill_deim_rtdetr/` covers RT-DETR backbones; `configs/distill_deim_different/` stores cross-backbone transfer (e.g., PResNet-50 -> HGNetv2-B0); `configs/distill_deimv2/` and `configs/distill_deimv2_different/` provide native DEIMv2 pairings and heterogeneous DINOv3->HGNetv2 cases.
-- **Feature alignment.** All YAMLs call the shared `DEIMFGDDistiller`, which applies 1x1 adapters, supports encoder/backbone sources, and schedules staged pairs (`c5/c4/c3` or `p5/p4/p3`).
+- **Config layout.** `configs/unikd_deim_dfine/` hosts DFINE teachers supervising compact HGNetv2 students; `configs/unikd_deim_rtdetr/` covers RT-DETR backbones; `configs/unikd_deimv2_different/` stores cross-backbone transfer (e.g., ViT-S -> HGNetv2-B0); `configs/unikd_deimv2/` and `configs/unikd_deimv2_different/` provide native DEIMv2 pairings and heterogeneous DINOv3->HGNetv2 cases.
+- **Feature alignment.** All YAMLs call the shared `DEIMFGDDistiller`, which applies 1x1 adapters, supports encoder/backbone sources, and schedules staged pairs (`c5/c4/c3`).
 - **Scheduled activation.** FGD begins only after Dense O2O copy-blend stops (e.g., `start_epoch: 148` for HGNetv2-N, `start_epoch: 60` for DINOv3-L) and ramps weights to suppress gradient spikes.
 - **Warm-start support.** Optional `student_ckpt` entries let you reuse a pure DEIM/DEIMv2 checkpoint that already finished augmentation-heavy training, reducing the epochs needed for stable distillation.
 - **Retuned coefficients.** We tune `alpha_fgd`, `beta_fgd`, `gamma_fgd`, and `lambda_fgd` to emphasize foreground cues while keeping background and relation terms bounded under Dense O2O.
@@ -390,12 +448,10 @@ If you use `UniKD` or its methods in your work, please cite the following BibTeX
   author={Zhang Hongye},
 }
 
-
-  
 ```
 </details>
 
 ## 7. Acknowledgement
-Our work is built upon [DEIM](https://github.com/Intellindust-AI-Lab/DEIM), [DEIMv2](https://github.com/Intellindust-AI-Lab/DEIMv2), [D-FINE](https://github.com/Peterande/D-FINE), [RT-DETR](https://github.com/lyuwenyu/RT-DETR) and [DINOv3](https://github.com/facebookresearch/dinov3). Thanks for their great work!
+Our work is built upon [DEIM](https://github.com/Intellindust-AI-Lab/DEIM), [DEIMv2](https://github.com/Intellindust-AI-Lab/DEIMv2), [FGD](https://github.com/yzd-v/FGD),[D-FINE](https://github.com/Peterande/D-FINE), [RT-DETR](https://github.com/lyuwenyu/RT-DETR) and [DINOv3](https://github.com/facebookresearch/dinov3). Thanks for their great work!
 
 ✨ Feel free to contribute and reach out if you have any questions! ✨

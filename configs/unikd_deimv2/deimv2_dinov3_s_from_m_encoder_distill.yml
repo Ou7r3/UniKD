@@ -12,8 +12,6 @@ DEIMFGDDistiller:
   student:
     type: DEIM
     backbone:
-    type: DEIM
-    backbone:
       type: DINOv3STAs
       name: vit_tiny
       embed_dim: 192
@@ -79,8 +77,8 @@ DEIMFGDDistiller:
       num_points: [6, 6, 6]
   feature_pairs:
     - name: c5
-      student_index: 0
-      teacher_index: 0
+      student_index: 2
+      teacher_index: 2
       meta:
         source: encoder
         start_epoch: 130
@@ -91,8 +89,8 @@ DEIMFGDDistiller:
         source: encoder
         start_epoch: 134
     - name: c3
-      student_index: 2
-      teacher_index: 2
+      student_index: 0
+      teacher_index: 0
       meta:
         source: encoder
         start_epoch: 138
