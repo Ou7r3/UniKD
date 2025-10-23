@@ -7,7 +7,7 @@ output_dir: ./outputs/distill_deimv2/hgnetv2_atto_from_n_backbone
 model: DEIMFGDDistiller
 
 last_epoch: 468
-epochs: 480
+epoches: 480
 
 DEIMFGDDistiller:
   student_ckpt: ./best/deimv2_hgnetv2_atto_coco.pth
