@@ -221,6 +221,7 @@ ckpts/
 <details open>
 <summary> COCO2017 </summary>
 
+
 1. Training
 ```shell
 # for HGNetv2-based-from-HGNetv2-based variants
@@ -228,9 +229,10 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=1235 --nproc_per_node=4   tr
 # for HGNetv2-based-from-ViT-based variants
 CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=1234 --nproc_per_node=4   train.py   -c configs/distill_deimv2_different/deimv2_hgnetv2_${model}_from_${model}_${backbone/encoder}_distill.yml   --use-amp --seed=1
 ```
+</details>
 
 <details>
-<summary> Customizing Batch Size </summary>
+<summary> Customizing FGD size </summary>
 
 For example, If you want to perform cross-framework training and adjust distillation parameters while using backbone or encoder, here are the instructions:
 
@@ -255,22 +257,31 @@ For example, If you want to perform cross-framework training and adjust distilla
             lambda_fgd: 0.000001
 
     ```
-2.**Modify your [deimv2_hgnetv2_atto_from_dinov3_s_encoder_distill.yml](./configs/unikd_deimv2_different/deimv2_hgnetv2_atto_from_dinov3_s_encoder_distill.yml)**If you wish to adjust the backbone or encoder using other modules, follow the steps below:
+2. **Modify Feature Pairs and Teacher Configuration in [deimv2_hgnetv2_atto_from_dinov3_s_encoder_distill.yml](./configs/unikd_deimv2_different/deimv2_hgnetv2_atto_from_dinov3_s_encoder_distill.yml)**. If you wish to adjust the backbone or encoder using other modules, follow the steps below:
 
     ```yaml
-    feature_pairs:
+    DEIMFGDDistiller:
+      feature_pairs:
         - name: c4
-        student_index: 0
-        teacher_index: 1
-        meta:
+          student_index: 0
+          teacher_index: 1
+          meta:
             source: encoder
             start_epoch: 502
-    eacher_ckpt: ./best/deimv2_dinov3_s_coco.pth
+      teacher_ckpt: ./best/deimv2_dinov3_s_coco.pth
     ```
-</details>  
+3. **Modify Training Epochs in [deimv2_hgnetv2_atto_from_dinov3_s_encoder_distill.yml](./configs/unikd_deimv2_different/deimv2_hgnetv2_atto_from_dinov3_s_encoder_distill.yml)**. Use `last_epoch` to determine which epoch to start knowledge distillation from:
+
+    ```yaml
+    last_epoch: 500
+    epoches: 524
+    ```
+
+</details>
+ 
 
 <details>
-<summary> Customizing Input Size </summary>
+<summary> Customizing Batch Size </summary>
 
 For example, if you want to double the total batch size when training D-FINE-L on COCO2017, here are the steps you should follow:
 
@@ -308,9 +319,9 @@ For example, if you want to double the total batch size when training D-FINE-L o
 
 </details>
 
-
 <details>
 <summary> Customizing Input Size </summary>
+
 
 If you'd like to train **DEIM** on COCO2017 with an input size of 320x320, follow these steps:
 
@@ -336,6 +347,40 @@ If you'd like to train **DEIM** on COCO2017 with an input size of 320x320, follo
     ```yaml
     eval_spatial_size: [320, 320]
     ```
+
+</details>
+
+<details>
+<summary> Customizing Epoch </summary>
+
+If you want to finetune **DEIMv2-S** for **20** epochs, follow these steps (for reference only; feel free to adjust them according to your needs):
+
+```yml
+epoches: 32 #  Total epochs: 20 for training + EMA  for 4n = 12. n refers to the model size in the matched config.
+
+flat_epoch: 14    # 4 + 20 // 2
+no_aug_epoch: 12  # 4n
+
+train_dataloader:
+  dataset: 
+    transforms:
+      ops:
+        ...
+      policy:
+        epoch: [4, 14, 20]   # [start_epoch, flat_epoch, epoches - no_aug_epoch]
+
+  collate_fn:
+    ...
+    mixup_epochs: [4, 14]  # [start_epoch, flat_epoch]
+    stop_epoch: 20  # epoches - no_aug_epoch
+    copyblend_epochs: [4, 20]  # [start_epoch, epoches - no_aug_epoch]
+  
+DEIMCriterion:
+  matcher:
+    ...
+    matcher_change_epoch: 18  # ~90% of (epoches - no_aug_epoch)
+
+```
 
 </details>
 
