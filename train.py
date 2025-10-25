@@ -1,12 +1,16 @@
 """
-DEIMv2: Real-Time Object Detection Meets DINOv3
-Copyright (c) 2025 The DEIMv2 Authors. All Rights Reserved.
+UniKD：Unified Cross-Architecture Knowledge Distillation with Warm-Start Scheduling for Real-Time DETR Models
+Copyright (c) 2025 The UniKD Authors. All Rights Reserved.
 ---------------------------------------------------------------------------------
-DEIM: DETR with Improved Matching for Fast Convergence
-Copyright (c) 2024 The DEIM Authors. All Rights Reserved.
+Modified from FGD：Focal and Global Knowledge Distillation for Detectors (https://github.com/yzd-v/FGD)
+Copyright (c) 2021 yzd-v.All Rights Reserved.
 ---------------------------------------------------------------------------------
-Modified from RT-DETR (https://github.com/lyuwenyu/RT-DETR)
-Copyright (c) 2023 lyuwenyu. All Rights Reserved.
+Modified from DEIMv2: Real-Time Object Detection Meets DINOv3 (https://github.com/Intellindust-AI-Lab/DEIMv2)
+Copyright (c) 2025 Intellindust-AI-Lab. All Rights Reserved.
+---------------------------------------------------------------------------------
+Modified from DEIM: DETR with Improved Matching for Fast Convergence (https://github.com/Intellindust-AI-Lab/DEIM)
+Copyright (c) 2023 Intellindust-AI-Lab. All Rights Reserved.
+
 """
 
 import os
