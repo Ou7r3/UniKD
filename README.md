@@ -41,11 +41,11 @@
 - [x] **\[2025.10.23\]** Release UniKD series.
 
 ## Table of Content
-* [1. Scheduling Policy](#1-Scheduling-Policy)
+* [1. Scheduling Policy](#1-scheduling-policy)
 * [2. Quick Start](#2-quick-start)
 * [3. Usage](#3-usage)
 * [4. Tools](#4-tools)
-* [5. DEIM-FGD Extensions](#5-deim-fgd-extensions)
+* [5. UniKD Extensions](#5-unikd-extensions)
 * [6. Citation](#6-citation)
 * [7. Acknowledgement](#7-acknowledgement)
   
@@ -57,14 +57,14 @@
 **PResNet-18** | 120 | 4 ──▶ 64 ──▶ 117 (stop) | c5 120, c4 124, c3 128
 **PResNet-34** | 120 | 4 ──▶ 64 ──▶ 117 (stop) | c5 120, c4 124, c3 128
 **DEIM DFINE/DEIMv2-HGNetv2** |
-**HGNetv2-B0** | 160 | 4 ──▶ 78 ──▶ 148 (stop) | c5 160, c4 164, c3 168
-**HGNetv2-B2** | 102 | 4 ──▶ 49 ──▶ 90 (stop) | c5 102,  c4 106,  c3 110
-**HGNetv2-B5** |58	| 4 ──▶ 29 ──▶ 50 (stop) | c5 58,  c4 62,  c3 66
+**HGNetv2-B0** | 160 | 4 ──▶ 78 ──▶ 148 (stop) | c4 160
+**HGNetv2-B2** | 102 | 4 ──▶ 49 ──▶ 90 (stop) | c5 102, c4 106
+**HGNetv2-B5** |58 | 4 ──▶ 29 ──▶ 50 (stop) | c5 58, c4 62, c3 66
 **DEIMv2 DINOv3** |
 **DINOv3-S** | 132	| 4 ──▶ 64 ──▶ 120 (stop) | c5 132, c4 136, c3 140
-**DINOv3-M** | 102	| 4 ──▶ 49 ──▶ 90 (stop) | c5 102,  c4 106,  c3 110
-**DINOv3-L** | 68 | 4 ──▶ 34 ──▶ 60 (stop) | c5 68,  c4 72,  c3 76
-**DINOv3-S** | 50 | 4 ──▶ 29 ──▶ 50 (stop) | c5 50,  c4 54,  c3 58
+**DINOv3-M** | 102	| 4 ──▶ 49 ──▶ 90 (stop) | c5 102, c4 106, c3 110
+**DINOv3-L** | 68 | 4 ──▶ 34 ──▶ 60 (stop) | c5 68, c4 72, c3 76
+**DINOv3-S** | 50 | 4 ──▶ 29 ──▶ 50 (stop) | c5 50, c4 54, c3 58
 
 
 ## 2. Quick start
@@ -88,11 +88,11 @@ pip install -r requirements.txt
 
     ```yaml
     train_dataloader:
-        img_folder: /data/COCO2017/train2017/
-        ann_file: /data/COCO2017/annotations/instances_train2017.json
+        img_folder: /yourdatastes/coco2017/train2017/
+        ann_file: /yourdatastes/coco2017/annotations/instances_train2017.json
     val_dataloader:
-        img_folder: /data/COCO2017/val2017/
-        ann_file: /data/COCO2017/annotations/instances_val2017.json
+        img_folder: /yourdatastes/coco2017/COCO2017/val2017/
+        ann_file: /yourdatastes/coco2017/annotations/instances_val2017.json
     ```
 
 </details>
@@ -426,7 +426,7 @@ bash reference/safe_training.sh
 </details>
 
 
-## 5. DEIM-FGD Extensions
+## 5. UniKD Extensions
 We open-sourced knowledge-distillation recipes that marry FGD[Yang, 2021] with both DEIM and DEIMv2 while preserving each framework's native schedulers.
 
 - **Config layout.** `configs/unikd_deim_dfine/` hosts DFINE teachers supervising compact HGNetv2 students; `configs/unikd_deim_rtdetr/` covers RT-DETR backbones; `configs/unikd_deimv2_different/` stores cross-backbone transfer (e.g., ViT-S -> HGNetv2-B0); `configs/unikd_deimv2/` and `configs/unikd_deimv2_different/` provide native DEIMv2 pairings and heterogeneous DINOv3->HGNetv2 cases.
